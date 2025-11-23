@@ -11,41 +11,63 @@ while ($row = $menu_result->fetch_assoc()) {
 
 // Proses Form Pemesanan
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
     $nama_pelanggan = $conn->real_escape_string($_POST['nama_pelanggan']);
     $alamat = $conn->real_escape_string($_POST['alamat']);
     $telepon = $conn->real_escape_string($_POST['telepon']);
     $detail_pesanan = $conn->real_escape_string($_POST['detail_pesanan']);
     $total_harga = (float)$_POST['total_harga'];
+    $metode_pembayaran = $conn->real_escape_string($_POST['metode_pembayaran']);
 
     // Upload bukti pembayaran
     $bukti = null;
     if (!empty($_FILES['bukti_pembayaran']['name'])) {
+
         $upload_dir = "uploads/";
         if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
 
-        $file_name = time() . "_" . basename($_FILES['bukti_pembayaran']['name']);
-        $target_path = $upload_dir . $file_name;
-        $allowed_ext = ['jpg', 'jpeg', 'png', 'webp'];
-        $ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+        $original_name = basename($_FILES['bukti_pembayaran']['name']);
+        $ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg','jpeg','png','webp'];
 
         if (in_array($ext, $allowed_ext)) {
+            $file_name = time() . "_" . preg_replace("/[^a-zA-Z0-9._-]/", "_", $original_name);
+            $target_path = $upload_dir . $file_name;
+
             if (move_uploaded_file($_FILES['bukti_pembayaran']['tmp_name'], $target_path)) {
-                $bukti = $file_name;
+                $bukti = $file_name; // simpan nama file ke database
+            } else {
+                $message = "<div class='alert alert-danger'>Upload gagal. Cek folder permission.</div>";
             }
+        } else {
+            $message = "<div class='alert alert-danger'>Format file tidak didukung.</div>";
         }
     }
 
-    $sql = "INSERT INTO orders (nama_pelanggan, alamat, telepon, detail_pesanan, total_harga, bukti_pembayaran) 
-            VALUES (?, ?, ?, ?, ?, ?)";
+    // PERBAIKAN TERPENTING: FORMAT bind_param
+    $sql = "INSERT INTO orders
+        (nama_pelanggan, alamat, telepon, detail_pesanan, total_harga, bukti_pembayaran, metode_pembayaran)
+        VALUES (?, ?, ?, ?, ?, ?, ?)";
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssds", $nama_pelanggan, $alamat, $telepon, $detail_pesanan, $total_harga, $bukti);
+    $stmt->bind_param(
+        "ssssdss",            // ← PERBAIKAN FORMAT
+        $nama_pelanggan,
+        $alamat,
+        $telepon,
+        $detail_pesanan,
+        $total_harga,
+        $bukti,
+        $metode_pembayaran
+    );
 
     if ($stmt->execute()) {
         header("Location: order.php?success=1&order_id=" . $conn->insert_id);
         exit;
     } else {
-        $message = "<div class='alert alert-danger'><i class='fas fa-times-circle'></i> Terjadi kesalahan: " . $conn->error . "</div>";
+        $message = "<div class='alert alert-danger'><i class='fas fa-times-circle'></i> Terjadi kesalahan: " . $stmt->error . "</div>";
     }
+
     $stmt->close();
 }
 ?>
@@ -126,16 +148,29 @@ if (isset($_GET['success'])) {
                 <input type="number" class="form-control fw-bold" id="total_harga" name="total_harga" readonly required>
 
                 <div class="mb-3 mt-4">
-                    <label class="form-label fw-bold">Metode Pembayaran</label>
-                    <div class="p-3 rounded shadow-sm bg-light mb-3">
-                        <p class="mb-1"><i class="fas fa-university text-primary me-2"></i><strong>BNI:</strong> 00885967</p>
-                        <p class="mb-1"><i class="fas fa-university text-success me-2"></i><strong>BRI:</strong> 982201234567890</p>
-                        <p class="mb-0"><i class="fas fa-wallet text-info me-2"></i><strong>DANA:</strong> 0896-1234-5678</p>
-                    </div>
-                    <label class="form-label">Upload Bukti Pembayaran</label>
-                    <input type="file" class="form-control" name="bukti_pembayaran" required accept="image/*">
-                    <small class="text-muted">Format diterima: JPG, PNG, WEBP (maks 2MB)</small>
+                <label class="form-label fw-bold">Metode Pembayaran</label>
+
+                <div class="p-3 rounded shadow-sm bg-light mb-3">
+                    <label class="d-block">
+                        <input type="radio" name="metode_pembayaran" value="BNI" required>
+                        <strong>BNI</strong> — 00885967
+                    </label>
+
+                    <label class="d-block mt-2">
+                        <input type="radio" name="metode_pembayaran" value="BRI">
+                        <strong>BRI</strong> — 982201234567890
+                    </label>
+
+                    <label class="d-block mt-2">
+                        <input type="radio" name="metode_pembayaran" value="DANA">
+                        <strong>DANA</strong> — 0896-1234-5678
+                    </label>
                 </div>
+
+                <label class="form-label">Upload Bukti Pembayaran</label>
+                <input type="file" class="form-control" name="bukti_pembayaran" required accept="image/*">
+            </div>
+
 
                 <button type="submit" class="btn btn-danger btn-lg w-100"><i class="fas fa-paper-plane"></i> Kirim Pesanan</button>
             </form>

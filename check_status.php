@@ -20,7 +20,7 @@ function getStatusBadge($status) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $search_term = $conn->real_escape_string($_POST['telepon']);
     
-    $sql = "SELECT id, nama_pelanggan, tanggal_pesan, total_harga, status, detail_pesanan 
+    $sql = "SELECT id, nama_pelanggan, tanggal_pesan, total_harga, status, detail_pesanan, metode_pembayaran
             FROM orders 
             WHERE telepon = ? 
             ORDER BY tanggal_pesan DESC";
@@ -117,14 +117,72 @@ body::before {
                     <p class="mb-1"><strong>Status Saat Ini:</strong> <?php echo getStatusBadge($order['status']); ?></p>
                     <p class="mb-1"><strong>Total Harga:</strong> Rp <?php echo number_format($order['total_harga'], 0, ',', '.'); ?></p>
                     <small class="text-muted">
-                        <strong>Detail Pesanan:</strong> <?php echo htmlspecialchars(substr($order['detail_pesanan'], 0, 70)) . '...'; ?>
+                        <strong>Detail Pesanan:</strong> <?php echo htmlspecialchars(substr(str_replace(["\\r\\n", "\\n", "\\r"], " ", $order['detail_pesanan']), 0, 70)) . '...'; ?>
                         <a data-bs-toggle="collapse" href="#detail-<?php echo $order['id']; ?>">[Lihat Semua Detail]</a>
                     </small>
                     <div class="collapse mt-2" id="detail-<?php echo $order['id']; ?>">
-                        <div class="card card-body bg-light">
-                            <pre style="white-space: pre-wrap; font-size: 0.9em; margin: 0;"><?php echo htmlspecialchars($order['detail_pesanan']); ?></pre>
-                        </div>
-                    </div>
+                        <div class="card card-body" style="
+    background: white;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    padding: 20px;
+    width: 100%;
+">
+
+<?php
+// Bersihkan baris dari database
+$detail = str_replace(["\\r\\n", "\\n", "\\r"], "\n", $order['detail_pesanan']);
+$items = array_filter(array_map('trim', explode("\n", $detail)));
+
+// Parsing item menjadi: qty | nama | harga total
+$parsed = [];
+foreach ($items as $line) {
+    // format contoh: "3x Cheese Bomb (Rp 100 x 3)"
+    if (preg_match('/(\d+)x\s+(.*?)\s+\(Rp\s*([\d\.]+) x (\d+)\)/i', $line, $m)) {
+        // Ambil Qty (m[1]) dan Harga Satuan (m[3])
+        $qty = (int) $m[1];
+        // Hapus tanda titik/koma dan konversi ke integer
+        $unit_price = (int) str_replace('.', '', $m[3]); 
+        
+        // Hitung Harga Total Per Item: Qty * Harga Satuan
+        $total_price_item = $qty * $unit_price; 
+        
+        $parsed[] = [
+            'qty' => $qty,
+            'name' => $m[2],
+            // Simpan harga total item (sudah diformat)
+            'price' => number_format($total_price_item, 0, ',', '.')
+        ];
+    } else {
+        $parsed[] = ['qty' => '', 'name' => $line, 'price' => ''];
+    }
+}
+?>
+
+<div style="white-space: pre; line-height: 1.4;">
+
+<?php foreach ($parsed as $p): ?>
+<?php
+$qty = str_pad($p['qty'], 2, " ", STR_PAD_LEFT);
+$name = str_pad($p['name'], 25);
+$price = str_pad($p['price'], 10, " ", STR_PAD_LEFT);
+?>
+<?= $qty ?> <?= $name ?> <?= $price . "\n" ?>
+<?php endforeach; ?>
+
+--------------------------------
+Subtotal :      Rp <?= number_format($order['total_harga'], 0, ',', '.') . "\n" ?>
+Total    :      Rp <?= number_format($order['total_harga'], 0, ',', '.') . "\n" ?>
+Payment  :      Rp <?= number_format($order['total_harga'], 0, ',', '.') . "\n" ?>
+Via <?= strtoupper($order['metode_pembayaran']); ?>
+
+--------------------------------
+#<?= $order['id']; ?>     CLOSED <?= date('d M y H:i', strtotime($order['tanggal_pesan'])) ?>
+
+</div>
+</div>
+
                 </div>
             <?php endforeach; ?>
         </div>

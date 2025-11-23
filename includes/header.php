@@ -25,6 +25,35 @@
         .bg-custom-red {
             background-color: #dc3545;
         }
+        
+        /* 🚨 CSS KUSTOM TAMBAHAN UNTUK PENANDA GARIS BAWAH */
+        .navbar-nav .nav-link {
+            position: relative; /* Diperlukan untuk pseudo-element ::after */
+            padding-bottom: 8px; /* Ruang untuk garis bawah */
+            transition: color 0.3s ease; /* Transisi untuk warna teks */
+        }
+
+        .navbar-nav .nav-link.active {
+            color: white !important; /* Warna teks aktif */
+            font-weight: bold; /* Teks tebal untuk aktif */
+        }
+
+        .navbar-nav .nav-link.active::after {
+            content: ''; /* Wajib untuk pseudo-element */
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0; /* Posisikan di bagian bawah link */
+            height: 3px; /* Ketebalan garis */
+            background-color: white; /* Warna garis */
+            border-radius: 2px; /* Sedikit lengkungan pada garis */
+        }
+
+        /* Hover effect (opsional) */
+        .navbar-nav .nav-link:not(.active):hover {
+            color: rgba(255, 255, 255, 0.75) !important; /* Sedikit lebih terang saat hover */
+        }
+        
     </style>
 </head>
 <body>
@@ -36,11 +65,43 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="menu.php">Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="order.php">Order</a></li>
-                 <li class="nav-item"><a class="nav-link" href="check_status.php">Status Order</a></li>
-                <li class="nav-item"><a class="nav-link" href="about.php">About & Contact</a></li>
+                <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+                
+                <li class="nav-item">
+                    <a class="nav-link <?php echo ($current_page == 'index.php' || $current_page == '') ? 'active' : ''; ?>" 
+                       href="index.php" 
+                       <?php echo ($current_page == 'index.php' || $current_page == '') ? 'aria-current="page"' : ''; ?>>
+                       Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo ($current_page == 'menu.php') ? 'active' : ''; ?>" 
+                       href="menu.php" 
+                       <?php echo ($current_page == 'menu.php') ? 'aria-current="page"' : ''; ?>>
+                       Menu
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo ($current_page == 'order.php') ? 'active' : ''; ?>" 
+                       href="order.php" 
+                       <?php echo ($current_page == 'order.php') ? 'aria-current="page"' : ''; ?>>
+                       Order
+                    </a>
+                </li>
+                 <li class="nav-item">
+                    <a class="nav-link <?php echo ($current_page == 'check_status.php') ? 'active' : ''; ?>" 
+                       href="check_status.php" 
+                       <?php echo ($current_page == 'check_status.php') ? 'aria-current="page"' : ''; ?>>
+                       Status Order
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo ($current_page == 'about.php') ? 'active' : ''; ?>" 
+                       href="about.php" 
+                       <?php echo ($current_page == 'about.php') ? 'aria-current="page"' : ''; ?>>
+                       About & Contact
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
