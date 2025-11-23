@@ -30,16 +30,12 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-custom-red sticky-top shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold fs-4" href="index.php">🍕 PIZZA SHOP</a>
+        <a class="navbar-brand fw-bold fs-4" href="index.php">🍕 PIZZA HOUSE</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="menu.php">Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="order.php">Order</a></li>
-                <li class="nav-item"><a class="nav-link" href="about.php">About & Contact</a></li>
                 <li class="nav-item">
                     <a class="btn btn-outline-light btn-sm ms-lg-3" href="admin/login.php">
                         <i class="fas fa-user-shield"></i> Admin Login

@@ -21,7 +21,7 @@
     "></div>
 
     <div style="position: relative; z-index: 2;">
-        <h1 class="display-4 fw-bold mb-3">Pizza Shop!</h1>
+        <h1 class="display-4 fw-bold mb-3">Welcome To Pizza House 🍕</h1>
         <p class="lead mb-4">Rasakan kelezatan pizza otentik dengan harga terbaik di kota.</p>
         <a href="menu.php" class="btn btn-warning btn-lg me-4">Lihat Menu Kami</a>
         <a href="order.php" class="btn btn-outline-light btn-lg">Pesan Sekarang</a>
