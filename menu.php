@@ -68,9 +68,9 @@ $result = $stmt->get_result();
 
 <!-- NAVIGASI KATEGORI ALA MCD -->
 <div class="menu-nav">
-    <a href="?kategori=pizza" class="<?= $kategori == 'pizza' ? 'active' : '' ?>">Pizza</a>
-    <a href="?kategori=snacks" class="<?= $kategori == 'snacks' ? 'active' : '' ?>">Snacks</a>
-    <a href="?kategori=drinks" class="<?= $kategori == 'drinks' ? 'active' : '' ?>">Drinks</a>
+    <a href="?kategori=pizza" class="<?= $kategori == 'pizza' ? 'active' : '' ?>">Pizza's</a>
+    <a href="?kategori=snacks" class="<?= $kategori == 'snacks' ? 'active' : '' ?>">Snack's</a>
+    <a href="?kategori=drinks" class="<?= $kategori == 'drinks' ? 'active' : '' ?>">Drink's</a>
 </div>
 
 <div class="row">

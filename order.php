@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
             li.className = "list-group-item d-flex justify-content-between";
             li.innerHTML = `
                 ${item.qty}× ${item.nama} — Rp ${new Intl.NumberFormat("id-ID").format(subtotal)}
-                <button class="btn btn-sm btn-danger" onclick="hapusPesanan(${index})">✖</button>
+                <button class="btn btn-sm btn-white" onclick="hapusPesanan(${index})">✖</button>
             `;
             daftarPesanan.appendChild(li);
         });
