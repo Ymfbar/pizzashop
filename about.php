@@ -48,7 +48,7 @@
             <div class="col-md-6 mb-4">
                 <div class="card shadow-lg p-4 h-100">
                     <h4 class="text-danger"><i class="fas fa-utensils"></i> Tentang Pizza House</h4>
-                    <p>Pizza Shop didirikan pada tahun 2023 dengan visi untuk menyajikan pizza berkualitas premium dengan harga yang terjangkau. Kami percaya bahwa setiap orang berhak menikmati pizza yang lezat dan dibuat dari bahan-bahan segar pilihan.</p>
+                    <p>Pizza House didirikan pada tahun 2023 dengan visi untuk menyajikan pizza berkualitas premium dengan harga yang terjangkau. Kami percaya bahwa setiap orang berhak menikmati pizza yang lezat dan dibuat dari bahan-bahan segar pilihan.</p>
                     <p>Kami bangga dengan resep adonan rahasia kami yang menghasilkan tekstur renyah di luar dan lembut di dalam. Cobalah sekarang!</p>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item"><i class="fas fa-map-marker-alt text-danger"></i> **Alamat:** Jl. Pizza No. 10, Kota Lezat, Indonesia</li>
                         <li class="list-group-item"><i class="fas fa-phone-alt text-danger"></i> **Telepon:** (021) 1234 5678</li>
-                        <li class="list-group-item"><i class="fas fa-envelope text-danger"></i> **Email:** info@pizzashop.com</li>
+                        <li class="list-group-item"><i class="fas fa-envelope text-danger"></i> **Email:** info@pizzahouse.com</li>
                         <li class="list-group-item"><i class="fab fa-whatsapp text-danger"></i> **WhatsApp:** 0812-3456-7890</li>
                     </ul>
                 </div>

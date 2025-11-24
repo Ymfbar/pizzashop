@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <h4 class="mb-0"><i class="fas fa-user-shield"></i> Admin Panel</h4>
             </div>
             <div class="card-body">
-                <h5 class="card-title text-center text-muted mb-4">Login ke PIZZA SHOP 🍕</h5>
+                <h5 class="card-title text-center text-muted mb-4">Login ke PIZZA HOUSE 🍕</h5>
                 <?php if (!empty($error)): ?>
                     <div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?></div>
                 <?php endif; ?>

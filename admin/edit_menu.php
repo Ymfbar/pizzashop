@@ -21,9 +21,22 @@ if ($id > 0) {
 
 // Proses Update
 if ($_SERVER["REQUEST_METHOD"] == "POST" && $id > 0) {
-    $nama = $conn->real_escape_string($_POST['nama']);
-    $deskripsi = $conn->real_escape_string($_POST['deskripsi']);
-    $harga = (float)$_POST['harga'];
+
+    $nama = trim($_POST['nama']);
+    $deskripsi = trim($_POST['deskripsi']);
+    $kategori = trim($_POST['kategori']);
+
+    // ✅ FIX harga biar gak ke-save jadi 100
+    $harga_raw = $_POST['harga'];
+    $harga_clean = str_replace(['Rp', '.', ',', ' '], '', $harga_raw);
+    $harga = (float)$harga_clean;
+
+    // Pastikan kategori sesuai enum DB
+    $allowed_kategori = ['pizza', 'snacks', 'drinks'];
+    if (!in_array($kategori, $allowed_kategori)) {
+        $kategori = 'pizza';
+    }
+
     $gambar_lama = $data_menu['gambar'];
     $gambar_nama = $gambar_lama;
 
@@ -50,12 +63,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $id > 0) {
 
     if ($message == '') {
         // Update ke Database
-        $sql = "UPDATE menu SET nama_pizza=?, deskripsi=?, harga=?, gambar=? WHERE id=?";
+        $sql = "UPDATE menu SET nama_pizza=?, deskripsi=?, harga=?, gambar=?, kategori=? WHERE id=?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssdsi", $nama, $deskripsi, $harga, $gambar_nama, $id);
+        $stmt->bind_param("ssdssi", $nama, $deskripsi, $harga, $gambar_nama, $kategori, $id);
 
         if ($stmt->execute()) {
-            $_SESSION['message'] = "<div class='alert alert-success'>Menu **" . htmlspecialchars($nama) . "** berhasil diperbarui.</div>";
+            $_SESSION['message'] = "<div class='alert alert-success'>Menu <strong>" . htmlspecialchars($nama) . "</strong> berhasil diperbarui.</div>";
             header("location: manage_menu.php");
             exit;
         } else {
@@ -72,17 +85,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $id > 0) {
 <?php if ($id > 0): ?>
 <div class="card shadow-lg p-4">
     <form method="POST" enctype="multipart/form-data">
+
         <div class="mb-3">
-            <label for="nama" class="form-label">Nama Pizza</label>
-            <input type="text" class="form-control" id="nama" name="nama" value="<?php echo htmlspecialchars($data_menu['nama_pizza']); ?>" required>
+            <label for="nama" class="form-label">Nama Menu</label>
+            <input type="text" class="form-control" id="nama" name="nama" 
+                value="<?php echo htmlspecialchars($data_menu['nama_pizza']); ?>" required>
         </div>
+
+        <div class="mb-3">
+            <label for="kategori" class="form-label">Kategori Menu</label>
+            <select class="form-select" id="kategori" name="kategori" required>
+                <option value="pizza"  <?php echo ($data_menu['kategori'] == 'pizza') ? 'selected' : ''; ?>>Pizza</option>
+                <option value="snacks" <?php echo ($data_menu['kategori'] == 'snacks') ? 'selected' : ''; ?>>Snacks</option>
+                <option value="drinks" <?php echo ($data_menu['kategori'] == 'drinks') ? 'selected' : ''; ?>>Drinks</option>
+            </select>
+        </div>
+
         <div class="mb-3">
             <label for="deskripsi" class="form-label">Deskripsi</label>
             <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" required><?php echo htmlspecialchars($data_menu['deskripsi']); ?></textarea>
         </div>
+
         <div class="mb-3">
             <label for="harga" class="form-label">Harga (Rp)</label>
-            <input type="number" class="form-control" id="harga" name="harga" step="any" value="<?php echo htmlspecialchars($data_menu['harga']); ?>" required>
+            <input type="text" class="form-control" id="harga" 
+                name="harga" value="<?php echo number_format($data_menu['harga'], 0, ',', '.'); ?>" required>
         </div>
         
         <h5 class="mt-4 mb-3 text-muted">Update Foto (Opsional)</h5>
@@ -90,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $id > 0) {
             <div class="col-md-6">
                 <label for="gambar" class="form-label">Pilih Foto Baru</label>
                 <input type="file" class="form-control" id="gambar" name="gambar" accept="image/*">
-                <small class="form-text text-muted">Kosongkan jika tidak ingin mengubah foto.</small>
+                <small class="form-text text-muted">Biarkan kosong jika tidak ingin mengubah foto.</small>
             </div>
             <div class="col-md-6 text-center">
                 <p>Foto Saat Ini:</p>

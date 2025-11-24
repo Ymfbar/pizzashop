@@ -4,6 +4,7 @@ CREATE TABLE menu (
     deskripsi TEXT,
     harga DECIMAL(10, 2) NOT NULL,
     gambar VARCHAR(255)
+    kategori ENUM('Pizza', 'Snack', 'Drink') NOT NULL DEFAULT 'Pizza'
 );
 
 CREATE TABLE users (

@@ -3,11 +3,11 @@ include 'includes/config.php';
 include 'includes/header.php';
 
 $message = '';
-$menu_result = $conn->query("SELECT id, nama_pizza, harga FROM menu ORDER BY nama_pizza ASC");
-$menu_options = [];
-while ($row = $menu_result->fetch_assoc()) {
-    $menu_options[] = $row;
-}
+
+// ✅ Ambil menu berdasarkan kategori
+$menu_pizza = $conn->query("SELECT id, nama_pizza, harga FROM menu WHERE kategori='pizza' ORDER BY nama_pizza ASC")->fetch_all(MYSQLI_ASSOC);
+$menu_snacks = $conn->query("SELECT id, nama_pizza, harga FROM menu WHERE kategori='snacks' ORDER BY nama_pizza ASC")->fetch_all(MYSQLI_ASSOC);
+$menu_drinks = $conn->query("SELECT id, nama_pizza, harga FROM menu WHERE kategori='drinks' ORDER BY nama_pizza ASC")->fetch_all(MYSQLI_ASSOC);
 
 // Proses Form Pemesanan
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $target_path = $upload_dir . $file_name;
 
             if (move_uploaded_file($_FILES['bukti_pembayaran']['tmp_name'], $target_path)) {
-                $bukti = $file_name; // simpan nama file ke database
+                $bukti = $file_name;
             } else {
                 $message = "<div class='alert alert-danger'>Upload gagal. Cek folder permission.</div>";
             }
@@ -44,14 +44,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // PERBAIKAN TERPENTING: FORMAT bind_param
     $sql = "INSERT INTO orders
         (nama_pelanggan, alamat, telepon, detail_pesanan, total_harga, bukti_pembayaran, metode_pembayaran)
         VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param(
-        "ssssdss",            // ← PERBAIKAN FORMAT
+        "ssssdss",
         $nama_pelanggan,
         $alamat,
         $telepon,
@@ -72,8 +71,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<h2 class="text-center text-warning mb-4"><i class="fas fa-shopping-cart"></i> Formulir Pemesanan</h2>
-<p class="text-center text-white lead">Lengkapi detail Anda dan pesanan Anda siap diantar!</p>
+<h2 class="text-center text-warning mb-4"><i class="fas fa-shopping-cart"></i> Order Form</h2>
+<p class="text-center text-white lead">Complete your details and your tasty order will be on its way!</p>
 
 <?php 
 if (isset($_GET['success'])) {
@@ -120,12 +119,13 @@ if (isset($_GET['success'])) {
 
                 <h5 class="mt-4 mb-3 text-danger">Detail Pesanan</h5>
 
+                <!-- ✅ Dropdown Pizza -->
                 <div class="row mb-3">
                     <div class="col-7">
                         <label class="form-label">Pilih Pizza</label>
-                        <select class="form-select" id="pilihan_menu">
+                        <select class="form-select menu-select" data-category="Pizza">
                             <option value="0" data-name="">-- Pilih Pizza --</option>
-                            <?php foreach ($menu_options as $opt): ?>
+                            <?php foreach ($menu_pizza as $opt): ?>
                                 <option value="<?= $opt['harga']; ?>" data-name="<?= $opt['nama_pizza']; ?>">
                                     <?= $opt['nama_pizza']; ?> (Rp <?= number_format($opt['harga'], 0, ',', '.') ?>)
                                 </option>
@@ -133,8 +133,46 @@ if (isset($_GET['success'])) {
                         </select>
                     </div>
                     <div class="col-5">
-                        <label class="form-label">Jumlah </label>
-                        <input type="number" min="1" value="1" class="form-control" id="qty_menu">
+                        <label class="form-label">Jumlah</label>
+                        <input type="number" min="1" value="1" class="form-control qty-input">
+                    </div>
+                </div>
+
+                <!-- ✅ Dropdown Snacks -->
+                <div class="row mb-3">
+                    <div class="col-7">
+                        <label class="form-label">Pilih Snacks</label>
+                        <select class="form-select menu-select" data-category="Snacks">
+                            <option value="0" data-name="">-- Pilih Snacks --</option>
+                            <?php foreach ($menu_snacks as $opt): ?>
+                                <option value="<?= $opt['harga']; ?>" data-name="<?= $opt['nama_pizza']; ?>">
+                                    <?= $opt['nama_pizza']; ?> (Rp <?= number_format($opt['harga'], 0, ',', '.') ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label">Jumlah</label>
+                        <input type="number" min="1" value="1" class="form-control qty-input">
+                    </div>
+                </div>
+
+                <!-- ✅ Dropdown Drinks -->
+                <div class="row mb-3">
+                    <div class="col-7">
+                        <label class="form-label">Pilih Drinks</label>
+                        <select class="form-select menu-select" data-category="Drinks">
+                            <option value="0" data-name="">-- Pilih Drinks --</option>
+                            <?php foreach ($menu_drinks as $opt): ?>
+                                <option value="<?= $opt['harga']; ?>" data-name="<?= $opt['nama_pizza']; ?>">
+                                    <?= $opt['nama_pizza']; ?> (Rp <?= number_format($opt['harga'], 0, ',', '.') ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label">Jumlah</label>
+                        <input type="number" min="1" value="1" class="form-control qty-input">
                     </div>
                 </div>
 
@@ -150,27 +188,30 @@ if (isset($_GET['success'])) {
                 <div class="mb-3 mt-4">
                 <label class="form-label fw-bold">Metode Pembayaran</label>
 
-                <div class="p-3 rounded shadow-sm bg-light mb-3">
-                    <label class="d-block">
+                <div class="p-3 shadow-sm bg-light mb-3">
+                    <label class="d-flex align-items-center gap-2 mb-2">
                         <input type="radio" name="metode_pembayaran" value="BNI" required>
-                        <strong>BNI</strong> — 00885967
+                        <img src="images/BNILogo.png" width="30" alt="BNI">
+                        <strong>BNI</strong> — 8888 1234 5678 9999
                     </label>
 
-                    <label class="d-block mt-2">
+                    <label class="d-flex align-items-center gap-2 mb-2">
                         <input type="radio" name="metode_pembayaran" value="BRI">
-                        <strong>BRI</strong> — 982201234567890
+                        <img src="images/BRILogo.png" width="30" alt="BRI">
+                        <strong>BRI</strong> — 0000 01 234567 89
                     </label>
 
-                    <label class="d-block mt-2">
+                    <label class="d-flex align-items-center gap-2">
                         <input type="radio" name="metode_pembayaran" value="DANA">
-                        <strong>DANA</strong> — 0896-1234-5678
+                        <img src="images/DANALogo.png" width="30" alt="DANA">
+                        <strong>DANA</strong> — 0812-0000-0000
                     </label>
                 </div>
+
 
                 <label class="form-label">Upload Bukti Pembayaran</label>
                 <input type="file" class="form-control" name="bukti_pembayaran" required accept="image/*">
             </div>
-
 
                 <button type="submit" class="btn btn-danger btn-lg w-100"><i class="fas fa-paper-plane"></i> Kirim Pesanan</button>
             </form>
@@ -180,12 +221,12 @@ if (isset($_GET['success'])) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const selectMenu = document.getElementById('pilihan_menu');
-    const qtyField = document.getElementById('qty_menu');
-    const tambahMenu = document.getElementById('tambah_menu');
-    const detailField = document.getElementById('detail_pesanan');
-    const daftarPesanan = document.getElementById('daftar_pesanan');
-    const totalHargaField = document.getElementById('total_harga');
+    const selects = document.querySelectorAll(".menu-select");
+    const qtyInputs = document.querySelectorAll(".qty-input");
+    const tambahMenu = document.getElementById("tambah_menu");
+    const detailField = document.getElementById("detail_pesanan");
+    const daftarPesanan = document.getElementById("daftar_pesanan");
+    const totalHargaField = document.getElementById("total_harga");
 
     let pesanan = [];
     let total = 0;
@@ -220,19 +261,27 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     tambahMenu.addEventListener('click', function() {
-        const selected = selectMenu.options[selectMenu.selectedIndex];
-        const harga = parseFloat(selected.value);
-        const nama = selected.getAttribute("data-name");
-        const qty = parseInt(qtyField.value);
+        selects.forEach((select, i) => {
+            const selected = select.options[select.selectedIndex];
+            const harga = parseFloat(selected.value);
+            const nama = selected.getAttribute("data-name");
+            const qty = parseInt(qtyInputs[i].value);
 
-        if (!harga || qty < 1) return;
+            if (harga && qty > 0) {
+                pesanan.push({ nama, harga, qty });
+            }
+        });
 
-        pesanan.push({ nama, harga, qty });
         renderPesanan();
+
+        // 🔥 RESET OTOMATIS SETELAH TAMBAH PESANAN
+        selects.forEach(select => select.selectedIndex = 0);
+        qtyInputs.forEach(qty => qty.value = 1);
     });
 
     renderPesanan();
 });
 </script>
+
 
 <?php include 'includes/footer.php'; $conn->close(); ?>

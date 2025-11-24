@@ -43,7 +43,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <style>
-/* BG + layout full height biar footer nempel bawah */
 html, body { height: 100%; margin: 0; }
 body {
     display: flex;
@@ -52,7 +51,6 @@ body {
     background-size: cover;
 }
 
-/* Overlay gelap */
 body::before {
     content: "";
     position: fixed;
@@ -61,7 +59,6 @@ body::before {
     z-index: -1;
 }
 
-/* Konten dorong footer ke bawah */
 .page-content {
     flex: 1;
     display: flex;
@@ -70,7 +67,6 @@ body::before {
     padding-top: 30px;
 }
 
-/* Tinggi card utama biar gak kelihatan pendek */
 .card {
     min-height: 360px;
 }
@@ -78,7 +74,7 @@ body::before {
 
 <div class="page-content">
 
-<h2 class="text-center text-warning mb-4"><i class="fas fa-search"></i> Cek Status Pesanan Anda</h2>
+<h2 class="text-center text-warning mb-4"><i class="fas fa-search"></i>Check The Status Of Your Order</h2>
 <p class="text-center text-light lead">Masukkan nomor telepon yang Anda gunakan saat memesan.</p>
 
 <div class="row justify-content-center">
@@ -98,8 +94,6 @@ body::before {
                     PIZZA HOUSE
                     </h3>
                 </div>
-
-
             </form>
         </div>
 
@@ -109,81 +103,77 @@ body::before {
         <h4 class="mt-4 text-warning">Hasil Pesanan Anda</h4>
         <div class="list-group mb-5">
             <?php foreach($orders as $order): ?>
+
+                <?php
+                // --- PARSING DETAIL PESANAN DI SINI ---
+                $detail = str_replace(["\\r\\n", "\\n", "\\r"], "\n", $order['detail_pesanan']);
+                $items = array_filter(array_map('trim', explode("\n", $detail)));
+
+                $parsed = [];
+                $subtotal = 0;
+
+                foreach ($items as $line) {
+                    if (preg_match('/(\d+)x\s+(.*?)\s+\(Rp\s*([\d\.]+)/i', $line, $m)) {
+                        $qty = (int) $m[1];
+                        $unit_price = (int) str_replace('.', '', $m[3]);
+                        $total = $qty * $unit_price;
+                        $subtotal += $total;
+
+                        $parsed[] = [
+                            'qty' => $qty,
+                            'name' => $m[2],
+                            'price' => number_format($total, 0, ',', '.')
+                        ];
+                    }
+                }
+                ?>
+
                 <div class="list-group-item list-group-item-action mb-3 shadow-sm rounded">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1 text-danger">Order ID #<?php echo $order['id']; ?></h5>
                         <small class="text-muted"><?php echo date('d M Y H:i', strtotime($order['tanggal_pesan'])); ?></small>
                     </div>
                     <p class="mb-1"><strong>Status Saat Ini:</strong> <?php echo getStatusBadge($order['status']); ?></p>
-                    <p class="mb-1"><strong>Total Harga:</strong> Rp <?php echo number_format($order['total_harga'], 0, ',', '.'); ?></p>
+                    <p class="mb-1"><strong>Total Harga:</strong> Rp <?php echo number_format($subtotal, 0, ',', '.'); ?></p>
                     <small class="text-muted">
                         <strong>Detail Pesanan:</strong> <?php echo htmlspecialchars(substr(str_replace(["\\r\\n", "\\n", "\\r"], " ", $order['detail_pesanan']), 0, 70)) . '...'; ?>
                         <a data-bs-toggle="collapse" href="#detail-<?php echo $order['id']; ?>">[Lihat Semua Detail]</a>
                     </small>
+
                     <div class="collapse mt-2" id="detail-<?php echo $order['id']; ?>">
                         <div class="card card-body" style="
-    background: white;
-    font-family: 'Courier New', monospace;
-    font-size: 15px;
-    border: 1px solid #ddd;
-    padding: 20px;
-    width: 100%;
-">
-
-<?php
-// Bersihkan baris dari database
-$detail = str_replace(["\\r\\n", "\\n", "\\r"], "\n", $order['detail_pesanan']);
-$items = array_filter(array_map('trim', explode("\n", $detail)));
-
-// Parsing item menjadi: qty | nama | harga total
-$parsed = [];
-foreach ($items as $line) {
-    // format contoh: "3x Cheese Bomb (Rp 100 x 3)"
-    if (preg_match('/(\d+)x\s+(.*?)\s+\(Rp\s*([\d\.]+) x (\d+)\)/i', $line, $m)) {
-        // Ambil Qty (m[1]) dan Harga Satuan (m[3])
-        $qty = (int) $m[1];
-        // Hapus tanda titik/koma dan konversi ke integer
-        $unit_price = (int) str_replace('.', '', $m[3]); 
-        
-        // Hitung Harga Total Per Item: Qty * Harga Satuan
-        $total_price_item = $qty * $unit_price; 
-        
-        $parsed[] = [
-            'qty' => $qty,
-            'name' => $m[2],
-            // Simpan harga total item (sudah diformat)
-            'price' => number_format($total_price_item, 0, ',', '.')
-        ];
-    } else {
-        $parsed[] = ['qty' => '', 'name' => $line, 'price' => ''];
-    }
-}
-?>
+                            background: white;
+                            font-family: 'Courier New', monospace;
+                            font-size: 15px;
+                            border: 1px solid #ddd;
+                            padding: 20px;
+                            width: 100%;
+                        ">
 
 <div style="white-space: pre; line-height: 1.4;">
-
 <?php foreach ($parsed as $p): ?>
 <?php
 $qty = str_pad($p['qty'], 2, " ", STR_PAD_LEFT);
 $name = str_pad($p['name'], 25);
 $price = str_pad($p['price'], 10, " ", STR_PAD_LEFT);
 ?>
-<?= $qty ?> <?= $name ?> <?= $price . "\n" ?>
+<?= $qty ?> <?= $name ?> Rp <?= $price . "\n" ?>
 <?php endforeach; ?>
 
 --------------------------------
-Subtotal :      Rp <?= number_format($order['total_harga'], 0, ',', '.') . "\n" ?>
-Total    :      Rp <?= number_format($order['total_harga'], 0, ',', '.') . "\n" ?>
-Payment  :      Rp <?= number_format($order['total_harga'], 0, ',', '.') . "\n" ?>
+Subtotal :      Rp <?= number_format($subtotal, 0, ',', '.') . "\n" ?>
+Total    :      Rp <?= number_format($subtotal, 0, ',', '.') . "\n" ?>
+Payment  :      Rp <?= number_format($subtotal, 0, ',', '.') . "\n" ?>
 Via <?= strtoupper($order['metode_pembayaran']); ?>
 
 --------------------------------
 #<?= $order['id']; ?>     CLOSED <?= date('d M y H:i', strtotime($order['tanggal_pesan'])) ?>
-
-</div>
 </div>
 
+                        </div>
+                    </div>
                 </div>
+
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
@@ -191,7 +181,6 @@ Via <?= strtoupper($order['metode_pembayaran']); ?>
 </div>
 
 </div> <!-- END page-content -->
-
 
 <?php
 include 'includes/footer.php';
