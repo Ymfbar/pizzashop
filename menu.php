@@ -32,7 +32,7 @@ $result = $stmt->get_result();
 
 .menu-nav a {
     text-decoration: none;
-    color: #555;
+    color: #ffffffff;
     padding-bottom: 6px;
 }
 
@@ -40,6 +40,25 @@ $result = $stmt->get_result();
     border-bottom: 3px solid #d32f2f;
     color: #d32f2f;
 }
+
+/* Mengatur pola background untuk menutupi seluruh halaman */
+body {
+    background-image: url('images/pattern2.png');
+    background-size: 1700px;    
+}
+
+/* Membuat dark overlay untuk seluruh halaman */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: -1;
+}
+
 
 .card-menu {
     transition: transform 0.25s ease-in-out;
@@ -63,10 +82,9 @@ $result = $stmt->get_result();
 }
 </style>
 
-<h2 class="text-center text-danger mb-2"><i class="fas fa-utensils"></i> Our Menu</h2>
-<p class="text-center text-muted lead mb-4">Find your perfect bite — select a menu category below.</p>
+<h2 class="text-center text-warning mb-2"><i class="fas fa-utensils"></i> Our Menu</h2>
+<p class="text-center text-white lead mb-4">Find your perfect bite — select a menu category below.</p>
 
-<!-- NAVIGASI KATEGORI ALA MCD -->
 <div class="menu-nav">
     <a href="?kategori=pizza" class="<?= $kategori == 'pizza' ? 'active' : '' ?>">Pizza's</a>
     <a href="?kategori=snacks" class="<?= $kategori == 'snacks' ? 'active' : '' ?>">Snack's</a>
