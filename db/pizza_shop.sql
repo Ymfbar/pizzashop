@@ -1,29 +1,55 @@
-CREATE TABLE menu (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nama_pizza VARCHAR(100) NOT NULL,
-    deskripsi TEXT,
-    harga DECIMAL(10, 2) NOT NULL,
-    gambar VARCHAR(255)
-    kategori ENUM('Pizza', 'Snack', 'Drink') NOT NULL DEFAULT 'Pizza'
-);
+CREATE DATABASE IF NOT EXISTS pizza_shop;
+USE pizza_shop;
 
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(20) DEFAULT 'admin'
-);
-
-CREATE TABLE orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nama_pelanggan VARCHAR(100) NOT NULL,
-    alamat TEXT NOT NULL,
-    telepon VARCHAR(20) NOT NULL,
-    total_harga DECIMAL(10,2) NOT NULL,
-    tanggal_pesan DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(50) DEFAULT 'Pending',
-    detail_pesanan TEXT NULL,
-    bukti_pembayaran VARCHAR(255) NULL
+-- Tabel admin
+CREATE TABLE `admin` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(20) NOT NULL DEFAULT 'admin',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO users (username, password) VALUES ('admin', '$2y$10$wE/YtJpL70fG9.qD4yR3h.wY/tT0W3.O0H9iJk2h8N0g.P0nS5v7G');
+-- Tabel menu
+CREATE TABLE `menu` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nama_pizza` varchar(100) NOT NULL,
+  `deskripsi` text,
+  `harga` decimal(10,2) NOT NULL,
+  `gambar` varchar(255) DEFAULT NULL,
+  `kategori` enum('pizza','snacks','drinks') NOT NULL,
+  `status` varchar(20) DEFAULT 'Available',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabel orders
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nama_pelanggan` varchar(100) NOT NULL,
+  `alamat` text NOT NULL,
+  `telepon` varchar(20) NOT NULL,
+  `total_harga` decimal(10,2) NOT NULL,
+  `tanggal_pesan` datetime DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(50) DEFAULT 'Pending',
+  `detail_pesanan` text DEFAULT NULL,
+  `bukti_pembayaran` varchar(255) DEFAULT NULL,
+  `metode_pembayaran` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabel order_items
+CREATE TABLE `order_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `menu_id` int(11) NOT NULL,
+  `nama_item` varchar(100) NOT NULL,
+  `harga_satuan` decimal(10,2) NOT NULL,
+  `kuantitas` int(11) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`),
+  KEY `menu_id` (`menu_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
