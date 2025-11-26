@@ -37,8 +37,8 @@ $result = $stmt->get_result();
 }
 
 .menu-nav a.active {
-    border-bottom: 3px solid #d32f2f;
-    color: #d32f2f;
+    border-bottom: 3px solid #ffc107;
+    color: #ffc107;
 }
 
 /* Mengatur pola background untuk menutupi seluruh halaman */
@@ -82,8 +82,17 @@ body::before {
 }
 </style>
 
-<h2 class="text-center text-warning mb-2"><i class="fas fa-utensils"></i> Our Menu</h2>
-<p class="text-center text-white lead mb-4">Find your perfect bite — select a menu category below.</p>
+<div class="d-flex justify-content-center">
+    <div class="card bg-white text-center p-4" style="max-width: 500px; border-radius: 15px;">
+        <h2 class="text-warning mb-2">
+            <i class="fas fa-utensils"></i> Our Menu
+        </h2>
+        <p class="text-dark lead mb-0">
+            Find your perfect bite — select a menu category below.
+        </p>
+    </div>
+</div>
+
 
 <div class="menu-nav">
     <a href="?kategori=pizza" class="<?= $kategori == 'pizza' ? 'active' : '' ?>">Pizza's</a>
