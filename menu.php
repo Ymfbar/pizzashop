@@ -43,7 +43,7 @@ $result = $stmt->get_result();
 
 /* Mengatur pola background untuk menutupi seluruh halaman */
 body {
-    background-image: url('images/pattern2.png');
+    background-image: url('images/pattern.png');
     background-size: 1700px;    
 }
 
@@ -82,12 +82,11 @@ body::before {
 }
 </style>
 
-<div class="d-flex justify-content-center">
-    <div class="card bg-white text-center p-4" style="max-width: 500px; border-radius: 15px;">
+<div class="text-center my-5">
         <h2 class="text-warning mb-2">
             <i class="fas fa-utensils"></i> Our Menu
         </h2>
-        <p class="text-dark lead mb-0">
+        <p class="text-white lead mb-0">
             Find your perfect bite — select a menu category below.
         </p>
     </div>
